@@ -9,7 +9,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
-import { FileVideo, Github, Upload, Wand2 } from 'lucide-react'
+import { FileVideo, Github, Upload, UploadCloud, Wand2 } from 'lucide-react'
 import { Button } from './components/ui/button'
 
 export function App() {
@@ -17,7 +17,10 @@ export function App() {
 		<div className="min-h-screen flex flex-col">
 			{/* Header */}
 			<header className="px-6 py-3 flex items-center justify-between border-b">
-				<h1 className="text-xl font-bold">upload.ai</h1>
+				<h1 className="text-xl font-bold font-mono flex items-center gap-2">
+					<UploadCloud className="w-8 h-8 text-violet-500" />
+					upload.ai
+				</h1>
 
 				{/* CTA */}
 				<div className="flex items-center gap-3">
@@ -58,8 +61,10 @@ export function App() {
 					{/* Tips */}
 					<p className="text-sm text-muted-foreground">
 						Lembre-se: você pode utilizar a variável{' '}
-						<code className="text-violet-700">{'{transcription}'}</code> no seu
-						prompt para adicionar o conteúdo da transcrição do vídeo
+						<code className="text-violet-700 font-mono">
+							{'{transcription}'}
+						</code>{' '}
+						no seu prompt para adicionar o conteúdo da transcrição do vídeo
 						selecionado.
 					</p>
 				</div>
