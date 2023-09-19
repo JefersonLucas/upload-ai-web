@@ -9,8 +9,9 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
-import { FileVideo, Github, Upload, UploadCloud, Wand2 } from 'lucide-react'
+import { Github, UploadCloud, Wand2 } from 'lucide-react'
 import { Button } from './components/ui/button'
+import { VideInputForm } from './components/video-input-form'
 
 export function App() {
 	return (
@@ -72,40 +73,7 @@ export function App() {
 				{/* Aside */}
 				<aside className="w-80 absolute top-6 bottom-6 right-6 overflow-y-scroll scrollbar px-2 scrollbar-thin scrollbar-track-violet-900/5 scrollbar-thumb-violet-600/5 space-y-6">
 					{/* Form 01 */}
-					<form className="space-y-6 w-full">
-						<label
-							htmlFor="video"
-							className="border w-full flex rounded-md aspect-video cursor-pointer border-dashed text-sm flex-col gap-2 items-center justify-center text-muted-foreground hover:bg-primary/5"
-						>
-							<FileVideo className="w-4 h-4" />
-							Selecione um video
-						</label>
-
-						<input
-							type="file"
-							name="video"
-							id="video"
-							accept="video/mp4"
-							className="sr-only"
-						/>
-
-						<Separator orientation="horizontal" />
-
-						<div className="space-y-2">
-							<Label htmlFor="transcription_prompt">Prompt de descrição</Label>
-
-							<Textarea
-								id="transcription_prompt"
-								className="h-20 leading-relaxed resize-none"
-								placeholder="Inclua palavras-chave mencionadas no vídeo separadas por vírgula (,)"
-							/>
-						</div>
-
-						<Button type="submit" className="w-full">
-							Carregar vídeo
-							<Upload className="w-4 h-4 ml-2" />
-						</Button>
-					</form>
+					<VideInputForm />
 
 					<Separator />
 
