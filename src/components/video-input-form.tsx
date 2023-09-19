@@ -1,3 +1,4 @@
+import { api } from '@/lib/axios'
 import { getFFmpeg } from '@/lib/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
 import { FileVideo, Upload } from 'lucide-react'
@@ -7,9 +8,19 @@ import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { Textarea } from './ui/textarea'
 
+type Status = 'waiting' | 'converting' | 'uploading' | 'generating' | 'success'
+
+const statusMessages = {
+	converting: 'Convertendo...',
+	generating: 'Transcrevendo...',
+	uploading: 'Carregando...',
+	success: 'Sucesso!',
+}
+
 export function VideInputForm() {
 	const [videoFile, setVideoFile] = useState<File | null>(null)
 	const promptInputRef = useRef<HTMLTextAreaElement>(null)
+	const [status, setStatus] = useState<Status>('waiting')
 
 	function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
 		const { files } = event.currentTarget
@@ -73,10 +84,34 @@ export function VideInputForm() {
 			return
 		}
 
+		setStatus('converting')
+
 		// Converter vídeo em audio
 		const audioFile = await convertVideoToAudio(videoFile)
 
-		console.log(audioFile, prompt)
+		// Criar um data par um formulário no tipo FormData
+		const data = new FormData()
+
+		// Campo file
+		data.append('file', audioFile)
+
+		setStatus('uploading')
+
+		// Fazer a requisição para enviar um vídeo
+		const response = await api.post('/videos', data)
+
+		// Obter o ID do vídeo
+		const videoId = response.data.video.id
+
+		setStatus('generating')
+
+		// Fazer a requisição para obter a transcrição do vídeo
+		await api.post(`/videos/${videoId}/transcription`, {
+			prompt,
+		})
+
+		setStatus('success')
+		console.log('Finalizou')
 	}
 
 	const previewURL = useMemo(() => {
@@ -123,15 +158,27 @@ export function VideInputForm() {
 
 				<Textarea
 					ref={promptInputRef}
+					disabled={status !== 'waiting'}
 					id="transcription_prompt"
 					className="h-20 leading-relaxed resize-none"
 					placeholder="Inclua palavras-chave mencionadas no vídeo separadas por vírgula (,)"
 				/>
 			</div>
 
-			<Button type="submit" className="w-full">
-				Carregar vídeo
-				<Upload className="w-4 h-4 ml-2" />
+			<Button
+				data-success={status === 'success'}
+				disabled={status !== 'waiting'}
+				type="submit"
+				className="w-full data-[success=true]:bg-emerald-400 data-[success=true]:text-white"
+			>
+				{status === 'waiting' ? (
+					<>
+						Carregar video
+						<Upload className="w-4 h-4 ml-2" />
+					</>
+				) : (
+					statusMessages[status]
+				)}
 			</Button>
 		</form>
 	)
