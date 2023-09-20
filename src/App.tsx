@@ -10,8 +10,8 @@ import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import { useCompletion } from 'ai/react'
-import { Github, UploadCloud, Wand2 } from 'lucide-react'
-import { useState } from 'react'
+import { Clipboard, Github, UploadCloud, Wand2 } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { PromptSelect } from './components/prompt-select'
 import { Button } from './components/ui/button'
 import { VideoInputForm } from './components/video-input-form'
@@ -19,6 +19,26 @@ import { VideoInputForm } from './components/video-input-form'
 export function App() {
 	const [temperature, setTemperature] = useState(0.5)
 	const [videoId, setVideoId] = useState<string | null>(null)
+	const [textCopied, setTextCopied] = useState<string | null>(null)
+	const textToCopyRef = useRef<HTMLTextAreaElement | null>(null)
+
+	function handleCopyText() {
+		if (textToCopyRef.current) {
+			// Seleciona o elemento de texto para copiar
+			textToCopyRef.current.select()
+
+			// Copia o texto para a área de transferência
+			document.execCommand('copy')
+
+			// Atualiza o estado para indicar que o texto foi copiado
+			setTextCopied('Copiado!')
+
+			// Limpa a mensagem após alguns segundos
+			setTimeout(() => {
+				setTextCopied(null)
+			}, 2000)
+		}
+	}
 
 	const {
 		input,
@@ -78,12 +98,24 @@ export function App() {
 							value={input}
 							onChange={handleInputChange}
 						/>
-						<Textarea
-							placeholder="Resultado gerado pela IA"
-							readOnly
-							className="resize-none p-4 leading-relaxed"
-							value={completion}
-						/>
+						<div className="relative">
+							<Textarea
+								placeholder="Resultado gerado pela IA"
+								readOnly
+								ref={textToCopyRef}
+								className="resize-none p-4 leading-relaxed h-full"
+								value={completion}
+							/>
+							<Button
+								disabled={!completion}
+								onClick={handleCopyText}
+								variant="ghost"
+								className="absolute bottom-4 right-4"
+							>
+								<Clipboard className="w-4 h-4 mr-2" />
+								{textCopied ? textCopied : 'Copiar'}
+							</Button>
+						</div>
 					</div>
 					{/* Tips */}
 					<p className="text-sm text-muted-foreground">
