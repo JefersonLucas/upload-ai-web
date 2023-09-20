@@ -9,13 +9,37 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
+import { useCompletion } from 'ai/react'
 import { Github, UploadCloud, Wand2 } from 'lucide-react'
+import { useState } from 'react'
+import { PromptSelect } from './components/prompt-select'
 import { Button } from './components/ui/button'
-import { VideInputForm } from './components/video-input-form'
+import { VideoInputForm } from './components/video-input-form'
 
 export function App() {
+	const [temperature, setTemperature] = useState(0.5)
+	const [videoId, setVideoId] = useState<string | null>(null)
+
+	const {
+		input,
+		setInput,
+		handleInputChange,
+		handleSubmit,
+		completion,
+		isLoading,
+	} = useCompletion({
+		api: 'http://localhost:3333/ai/complete',
+		body: {
+			videoId,
+			temperature,
+		},
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	})
+
 	return (
-		<div className="min-h-screen flex flex-col">
+		<div className="min-h-screen flex flex-col select-none">
 			{/* Header */}
 			<header className="px-6 py-3 flex items-center justify-between border-b">
 				<h1 className="text-xl font-bold font-mono flex items-center gap-2">
@@ -50,15 +74,17 @@ export function App() {
 					<div className="grid grid-rows-2 gap-4 flex-1">
 						<Textarea
 							placeholder="Inclua o promp para IA..."
-							className="resize-none p-4 leading-relaxed"
+							className="resize-none p-4 leading-relaxed scrollbar px-2 scrollbar-thin scrollbar-track-violet-900/5 scrollbar-thumb-violet-600/5"
+							value={input}
+							onChange={handleInputChange}
 						/>
 						<Textarea
 							placeholder="Resultado gerado pela IA"
 							readOnly
 							className="resize-none p-4 leading-relaxed"
+							value={completion}
 						/>
 					</div>
-
 					{/* Tips */}
 					<p className="text-sm text-muted-foreground">
 						Lembre-se: você pode utilizar a variável{' '}
@@ -73,26 +99,16 @@ export function App() {
 				{/* Aside */}
 				<aside className="w-80 absolute top-6 bottom-6 right-6 overflow-y-scroll scrollbar px-2 scrollbar-thin scrollbar-track-violet-900/5 scrollbar-thumb-violet-600/5 space-y-6">
 					{/* Form 01 */}
-					<VideInputForm />
+					<VideoInputForm onVideoUploaded={setVideoId} />
 
 					<Separator />
 
 					{/* Form 02 */}
-					<form className="space-y-6">
+					<form onSubmit={handleSubmit} className="space-y-6">
 						<div className="space-y-2">
 							<Label>Prompt</Label>
 
-							<Select>
-								<SelectTrigger>
-									<SelectValue placeholder="Selecione um prompt..." />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="title">Título do YouTube</SelectItem>
-									<SelectItem value="description">
-										Descrição do YouTube
-									</SelectItem>
-								</SelectContent>
-							</Select>
+							<PromptSelect onPromptSelected={setInput} />
 						</div>
 
 						<div className="space-y-2">
@@ -117,7 +133,13 @@ export function App() {
 						<div className="space-y-4">
 							<Label>Temperatura</Label>
 
-							<Slider min={0} max={100} step={0.1} />
+							<Slider
+								min={0}
+								max={1}
+								step={0.1}
+								value={[temperature]}
+								onValueChange={(value) => setTemperature(value[0])}
+							/>
 
 							<span className="block text-sm italic text-muted-foreground leading-relaxed">
 								Valores mais altos tendem a deixar o resultado mais criativo e
@@ -127,7 +149,7 @@ export function App() {
 
 						<Separator />
 
-						<Button type="submit" className="w-full">
+						<Button disabled={isLoading} type="submit" className="w-full">
 							Executar <Wand2 className="w-4 h-4 ml-2" />
 						</Button>
 					</form>
